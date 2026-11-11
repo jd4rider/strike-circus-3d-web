@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0618">
+    <title>Strike Circus 3D</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0618;
+        color: #f5f4ff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      }
+
+      #stage {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 66px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(circle at 50% 10%, rgba(255, 70, 180, 0.16), transparent 55%),
+          radial-gradient(circle at 50% 100%, rgba(60, 220, 255, 0.12), transparent 55%),
+          #0b0618;
+      }
+
+      #unity-container {
+        position: relative;
+        width: 720px;
+        height: 1280px;
+        max-width: calc(100vw - 16px);
+        max-height: calc(100vh - 82px);
+      }
+
+      #unity-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #120a24;
+        border-radius: 12px;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), 0 0 60px rgba(160, 80, 255, 0.18);
+        touch-action: none;
+      }
+
+      #unity-loading-bar {
+        display: none;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 220px;
+      }
+
+      #unity-logo {
+        width: 100%;
+        height: 44px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 44'%3E%3Ctext x='110' y='30' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='24' fill='%23ffd447'%3ESTRIKE CIRCUS%3C/text%3E%3C/svg%3E") no-repeat center;
+        background-size: contain;
+        margin-bottom: 18px;
+      }
+
+      #unity-progress-bar-empty {
+        width: 100%;
+        height: 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.12);
+        overflow: hidden;
+      }
+
+      #unity-progress-bar-full {
+        width: 0;
+        height: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #3cf3ff, #ff4fc4);
+        transition: width 0.15s linear;
+      }
+
+      #unity-warning {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 12px;
+        display: none;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      #unity-warning div {
+        border-radius: 8px;
+        margin-bottom: 6px;
+        color: #160b22;
+      }
+
+      #arcade-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 66px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        box-sizing: border-box;
+        background: #0b0618;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        z-index: 20;
+      }
+
+      .brand {
+        font-size: 13px;
+        letter-spacing: 0.18em;
+        color: rgba(245, 244, 255, 0.66);
+      }
+
+      .brand b {
+        color: #ffd447;
+      }
+
+      .footer-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      #unity-fullscreen-button {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: rgba(255, 255, 255, 0.06);
+        color: #f5f4ff;
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-size: 12px;
+        letter-spacing: 0.10em;
+        cursor: pointer;
+      }
+
+      #unity-fullscreen-button:hover {
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .bmc img {
+        display: block;
+        height: 44px;
+        width: auto;
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
+      }
+
+      @media (max-width: 520px) {
+        #arcade-footer {
+          height: 60px;
+          padding: 0 10px;
+        }
+
+        #stage {
+          bottom: 60px;
+        }
+
+        .brand {
+          font-size: 11px;
+          letter-spacing: 0.10em;
+        }
+
+        .bmc img {
+          height: 38px;
+        }
+
+        #unity-fullscreen-button {
+          padding: 7px 10px;
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div id="unity-container" class="unity-desktop">
+        <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+        <div id="unity-loading-bar">
+          <div id="unity-logo"></div>
+          <div id="unity-progress-bar-empty">
+            <div id="unity-progress-bar-full"></div>
+          </div>
+        </div>
+        <div id="unity-warning"> </div>
+      </div>
+    </div>
+
+    <footer id="arcade-footer">
+      <span class="brand">STRIKE CIRCUS <b>3D</b></span>
+      <div class="footer-actions">
+        <button id="unity-fullscreen-button" type="button">FULLSCREEN</button>
+        <a class="bmc" id="tip-jar-link" href="https://www.buymeacoffee.com/jd4rider"
+           target="_blank" rel="noopener" aria-label="Buy me a coffee">
+          <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee">
+        </a>
+      </div>
+    </footer>
+
+    <script>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
+      var tipJarLink = document.querySelector("#tip-jar-link");
+
+      // The arcade client owns the tip jar address; the href is the offline fallback.
+      tipJarLink.addEventListener("click", function (event) {
+        var arcade = window.LittleJoyArcade && window.LittleJoyArcade.tipJar;
+        if (arcade && typeof arcade.open === "function") {
+          event.preventDefault();
+          try { arcade.open(); } catch (e) { window.open(tipJarLink.href, "_blank", "noopener"); }
+        }
+      });
+
+      function unityShowBanner(msg, type) {
+        var div = document.createElement("div");
+        div.innerHTML = msg;
+        div.style.padding = "10px";
+        if (type === "error") {
+          div.style.background = "#ff6b6b";
+        } else {
+          div.style.background = "#ffd447";
+          setTimeout(function () {
+            if (div.parentNode) warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        warningBanner.appendChild(div);
+        updateBannerVisibility();
+      }
+
+      function updateBannerVisibility() {
+        warningBanner.style.display = warningBanner.children.length ? "block" : "none";
+      }
+
+      function fitStage() {
+        var stage = document.getElementById("stage");
+        var aspect = 9 / 16;
+        var availableWidth = Math.max(160, stage.clientWidth - 16);
+        var availableHeight = Math.max(160, stage.clientHeight - 16);
+        var width = availableWidth;
+        var height = width / aspect;
+
+        if (height > availableHeight) {
+          height = availableHeight;
+          width = height * aspect;
+        }
+
+        container.style.width = Math.round(width) + "px";
+        container.style.height = Math.round(height) + "px";
+      }
+
+      window.addEventListener("resize", fitStage);
+      fitStage();
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/WebGL.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/WebGL.data",
+        frameworkUrl: buildUrl + "/WebGL.framework.js",
+        codeUrl: buildUrl + "/WebGL.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: DefaultCompany,
+        productName: Strike Circus 3D,
+        productVersion: 0.1.0,
+        showBanner: unityShowBanner,
+      };
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = function () {
+        createUnityInstance(canvas, config, function (progress) {
+          progressBarFull.style.width = 100 * progress + "%";
+        }).then(function (unityInstance) {
+          loadingBar.style.display = "none";
+          fullscreenButton.onclick = function () {
+            unityInstance.SetFullscreen(1);
+          };
+        }).catch(function (message) {
+          alert(message);
+        });
+      };
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
