@@ -23,21 +23,15 @@
         right: 0;
         top: 0;
         bottom: 66px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background:
-          radial-gradient(circle at 50% 10%, rgba(255, 70, 180, 0.16), transparent 55%),
-          radial-gradient(circle at 50% 100%, rgba(60, 220, 255, 0.12), transparent 55%),
-          #0b0618;
+        display: block;
+        overflow: hidden;
+        background: #0b0618;
       }
 
       #unity-container {
         position: relative;
-        width: 720px;
-        height: 1280px;
-        max-width: calc(100vw - 16px);
-        max-height: calc(100vh - 82px);
+        width: 100%;
+        height: 100%;
       }
 
       #unity-canvas {
@@ -45,8 +39,6 @@
         width: 100%;
         height: 100%;
         background: #120a24;
-        border-radius: 12px;
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), 0 0 60px rgba(160, 80, 255, 0.18);
         touch-action: none;
       }
 
@@ -156,12 +148,12 @@
 
       @media (max-width: 520px) {
         #arcade-footer {
-          height: 60px;
+          height: 58px;
           padding: 0 10px;
         }
 
         #stage {
-          bottom: 60px;
+          bottom: 58px;
         }
 
         .brand {
@@ -245,20 +237,12 @@
       }
 
       function fitStage() {
+        // The play area is the whole stage: a phone gets a full-bleed portrait frame and a
+        // desktop gets the full window width, where the camera reveals the neighbouring
+        // lanes instead of letterboxing the alley into a narrow strip.
         var stage = document.getElementById("stage");
-        var aspect = 9 / 16;
-        var availableWidth = Math.max(160, stage.clientWidth - 16);
-        var availableHeight = Math.max(160, stage.clientHeight - 16);
-        var width = availableWidth;
-        var height = width / aspect;
-
-        if (height > availableHeight) {
-          height = availableHeight;
-          width = height * aspect;
-        }
-
-        container.style.width = Math.round(width) + "px";
-        container.style.height = Math.round(height) + "px";
+        container.style.width = Math.max(200, stage.clientWidth) + "px";
+        container.style.height = Math.max(200, stage.clientHeight) + "px";
       }
 
       window.addEventListener("resize", fitStage);
